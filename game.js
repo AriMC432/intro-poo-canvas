@@ -111,7 +111,7 @@ class Paddle {
 
 
 // Clase Game (Controla el juego)
-class Game {
+/*class Game {
     constructor() {
     this.ball = new Ball(canvas.width / 2, canvas.height / 2, 10, 4, 4);
     this.paddle1 = new Paddle(0, canvas.height / 2 - 50, 10, 100, true); // Controlado por el 
@@ -168,7 +168,95 @@ class Game {
         };
         gameLoop();
         }
+        }*/
+        class Game {
+            constructor() {
+                // Crear varias pelotas con diferentes tamaños, velocidades y colores pastel
+                this.balls = [
+                    new Ball(canvas.width / 2, canvas.height / 2, 10, 4, 4, '#0da296'), 
+                    new Ball(canvas.width / 3, canvas.height / 3, 15, -3, 3, '#562987'), 
+                    new Ball(canvas.width / 4, canvas.height / 4, 20, 2, -2, '#f1e8e5'), 
+                    new Ball(canvas.width / 5, canvas.height / 2, 25, -4, -4, '#e1d62d'), 
+                    new Ball(canvas.width / 6, canvas.height / 3, 30, 5, 3, '#fc5e27') 
+                ];
+                
+                // Paleta izquierda (verde manzana) el doble de alta
+                this.paddle1 = new Paddle(0, canvas.height / 2 - 100, 11, 200, true, '#62e54c'); 
+                // Paleta derecha (roja)
+                this.paddle2 = new Paddle(canvas.width - 10, canvas.height / 2 - 50, 12, 100, false, '#b9512a'); 
+                this.keys = {}; // Para capturar las teclas
+            }
+        
+            draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                // Dibujar cada pelota
+                this.balls.forEach(ball => ball.draw());
+                this.paddle1.draw();
+                this.paddle2.draw();
+            }
+        
+            update() {
+                // Mover cada pelota
+                this.balls.forEach(ball => ball.move());
+        
+                // Movimiento de la paleta 1 (Jugador) controlado por teclas
+                if (this.keys['ArrowUp']) {
+                    this.paddle1.move('up');
+                }
+                if (this.keys['ArrowDown']) {
+                    this.paddle1.move('down');
+                }
+        
+                // Limitar el movimiento dentro del canvas para la paleta 1
+                if (this.paddle1.y < 0) {
+                    this.paddle1.y = 0;
+                } else if (this.paddle1.y + this.paddle1.height > canvas.height) {
+                    this.paddle1.y = canvas.height - this.paddle1.height;
+                }
+        
+                // Movimiento de la paleta 2 (Controlada por IA)
+                this.paddle2.autoMove(this.balls[0]); // La IA sigue la primera pelota
+        
+                // Colisiones con las paletas para cada pelota
+                this.balls.forEach(ball => {
+                    // Colisión con la paleta 1
+                    if (ball.x - ball.radius <= this.paddle1.x + this.paddle1.width &&
+                        ball.y >= this.paddle1.y && ball.y <= this.paddle1.y + this.paddle1.height) {
+                        ball.speedX = -ball.speedX;
+                    }
+                    // Colisión con la paleta 2
+                    if (ball.x + ball.radius >= this.paddle2.x &&
+                        ball.y >= this.paddle2.y && ball.y <= this.paddle2.y + this.paddle2.height) {
+                        ball.speedX = -ball.speedX;
+                    }
+                    // Detectar cuando la pelota sale de los bordes (punto marcado)
+                    if (ball.x - ball.radius <= 0 || ball.x + ball.radius >= canvas.width) {
+                        ball.reset();
+                    }
+                });
+            }
+        
+            // Captura de teclas para el control de la paleta
+            handleInput() {
+                window.addEventListener('keydown', (event) => {
+                    this.keys[event.key] = true;
+                });
+                window.addEventListener('keyup', (event) => {
+                    this.keys[event.key] = false;
+                });
+            }
+        
+            run() {
+                this.handleInput();
+                const gameLoop = () => {
+                    this.update();
+                    this.draw();
+                    requestAnimationFrame(gameLoop);
+                };
+                gameLoop();
+            }
         }
+
 
 
 // Crear instancia del juego y ejecutarlo
