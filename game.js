@@ -3,7 +3,7 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 // Clase Ball (Pelota)
-class Ball {
+/*class Ball {
 constructor(x, y, radius, speedX, speedY) {
 this.x = x;
 this.y = y;
@@ -31,6 +31,82 @@ this.x = canvas.width / 2;
 this.y = canvas.height / 2;
 this.speedX = -this.speedX; // Cambia dirección al resetear
 }
+}*/
+class Ball {
+    constructor(x, y, radius, speedX, speedY, color) {
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.speedX = speedX;
+        this.speedY = speedY;
+        this.color = color;
+    }
+
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    move() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        // Colisión con la parte superior e inferior
+        if (this.y - this.radius <= 0 || this.y + this.radius >= canvas.height) {
+            this.speedY = -this.speedY;
+        }
+    }
+
+    reset() {
+        this.x = canvas.width / 2;
+        this.y = canvas.height / 2;
+        this.speedX = -this.speedX; // Cambia dirección al resetear
+    }
+}
+
+// Clase Paddle (Paleta)
+class Paddle {
+    constructor(x, y, width, height, isPlayerControlled = false, color = 'white') {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.isPlayerControlled = isPlayerControlled;
+        this.speed = 5;
+        this.color = color;
+    }
+
+    draw() {
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+    }
+
+    move(direction) {
+        if (direction === 'up' && this.y > 0) {
+            this.y -= this.speed;
+        } else if (direction === 'down' && this.y + this.height < canvas.height) {
+            this.y += this.speed;
+        }
+    }
+
+    // Movimiento de la paleta automática (IA)
+    autoMove(ball) {
+        if (ball.y < this.y + this.height / 2) {
+            this.y -= this.speed;
+        } else if (ball.y > this.y + this.height / 2) {
+            this.y += this.speed;
+        }
+
+        // Limitar el movimiento dentro del canvas
+        if (this.y < 0) {
+            this.y = 0;
+        } else if (this.y + this.height > canvas.height) {
+            this.y = canvas.height - this.height;
+        }
+    }
 }
 
 
